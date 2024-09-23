@@ -7,12 +7,10 @@ CC := g++
 CCFLAGS := -std=c++17
 CXXFLAGS := -I$(INC_DIR)
 
-all: directories
-
-directories:
-	@mkdir -p $(BIN_DIR)
+DIR_CHK = @mkdir -p $(BIN_DIR)
 
 monty:
+	$(DIR_CHK)
 	$(CC) -o $(BIN_DIR)/monty $(SRC) $(CCFLAGS) $(CXXFLAGS)
 
 clean:
