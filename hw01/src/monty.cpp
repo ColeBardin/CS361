@@ -5,7 +5,7 @@
 */
 
 /**
- @file
+ @file monty.cpp
  @author Cole Bardin <cab572@drexel.edu>
  @date September 23, 2024
  @section DESCRIPTION
@@ -16,7 +16,7 @@
 #include <thread>
 #include <time.h>
 
-int run_tests(int tests, int *ret);
+#include "monty.h"
 
 int main(int argc, char **argv) {
     int tests;
@@ -58,14 +58,13 @@ int main(int argc, char **argv) {
 
 int run_tests(int tests, int *ret){
     int switch_wins;
-    int i;
     int prize;
     int choice;
     
     if(!ret) return -1;
 
     switch_wins = 0;
-    for(i = 0; i < tests; i++){
+    while(tests-- > 0){
         prize = std::rand() / ((RAND_MAX + 1u)/ 3);   
         choice = std::rand() / ((RAND_MAX + 1u)/ 3);   
         if(prize != choice) switch_wins++;
