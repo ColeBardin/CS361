@@ -13,12 +13,14 @@
 */
 #include <iostream>
 #include <random>
+#include <thread>
 #include <time.h>
 
-int run_tests(int tests);
+int run_tests(int tests, int *ret);
 
 int main(int argc, char **argv) {
     int tests;
+    int switch_wins;
 
     if(argc != 2){
         std::cerr << "ERROR: Incorrect number of arguments" << std::endl;
@@ -33,23 +35,34 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    std::cout << "Running " << tests << " tests..." << std::endl;
+    std::cout << "Running " << tests << " tests across 2 threads..." << std::endl;
     srand(time(NULL));
 
-    int switch_wins = run_tests(tests);
+    int r1 = 0;
+    int r2 = 0;
+
+    std::thread t1(run_tests, tests / 2, &r1);
+    std::thread t2(run_tests, (tests / 2) + (tests % 2 ? 1 : 0), &r2);
+
+    t1.join();
+    t2.join();
+    switch_wins = r1 + r2;
 
     float sw_ratio = 100.0 * switch_wins / tests;
-    std::cout << "Switch wins:   " << switch_wins << " (" << sw_ratio << "%)" << std::endl;
-    std::cout << "Switch losses: " << tests - switch_wins << " (" << 100 - sw_ratio << "%)" << std::endl;
+
+    std::cout << "Switch would win " << sw_ratio << " percent of experiments." << std::endl;
+    std::cout << "Stay would win   " << 100.0 - sw_ratio << " percent of experiments." << std::endl;
 
     return 0;
 }
 
-int run_tests(int tests){
+int run_tests(int tests, int *ret){
     int switch_wins;
     int i;
     int prize;
     int choice;
+    
+    if(!ret) return -1;
 
     switch_wins = 0;
     for(i = 0; i < tests; i++){
@@ -58,7 +71,8 @@ int run_tests(int tests){
         if(prize != choice) switch_wins++;
     }
 
-    return switch_wins;
+    *ret = switch_wins;
+    return 0;
 }
 
 
