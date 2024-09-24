@@ -19,23 +19,20 @@
 #include "monty.h"
 
 int main(int argc, char **argv) {
-    int tests;
-    int switch_wins;
-
     if(argc != 2){
         std::cerr << "ERROR: Incorrect number of arguments" << std::endl;
         std::cerr << "Usage: " << argv[0] << " <ntests>" << std::endl;     
         return 1;
     }
 
-    tests = std::atoi(argv[1]);
+    int tests = std::atoi(argv[1]);
     if(!tests){
-        std::cerr << "ERROR: failed to parse number of tests argument" << std::endl;
+        std::cerr << "ERROR: Failed to parse ntests argument" << std::endl;
         std::cerr << "Usage: " << argv[0] << " <ntests>" << std::endl;     
         return 1;
     }
 
-    std::cout << "Running " << tests << " tests across 2 threads..." << std::endl;
+    std::cout << "Monty Hall Problem Simulator" << std::endl;
     srand(time(NULL));
 
     int r1 = 0;
@@ -46,7 +43,7 @@ int main(int argc, char **argv) {
 
     t1.join();
     t2.join();
-    switch_wins = r1 + r2;
+    int switch_wins = r1 + r2;
 
     float sw_ratio = 100.0 * switch_wins / tests;
 
@@ -73,11 +70,4 @@ int run_tests(int tests, int *ret){
     *ret = switch_wins;
     return 0;
 }
-
-
-
-
-
-
-
 
