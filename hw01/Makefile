@@ -13,9 +13,9 @@ monty:
 	$(DIR_CHK)
 	$(CC) -o $(BIN_DIR)/monty $(SRC) $(CCFLAGS) $(CXXFLAGS)
 none:
-	$(BIN_DIR)/monty
+	$(BIN_DIR)/monty || true
 cat:
-	$(BIN_DIR)/monty cat
+	$(BIN_DIR)/monty cat || true
 test16:
 	$(BIN_DIR)/monty 16
 test100:
