@@ -12,7 +12,7 @@
  @author Cole Bardin <cab572@drexel.edu>
  @date September 23, 2024
  @section DESCRIPTION
- This is the main file of the program. It handles command line inputs and seeds the RNG.
+ This is the main file of the program. It handles command line inputs.
  Then it will spin threads to do the simulation. Then collect the results and display the stats.
  */
 #include <iostream>
