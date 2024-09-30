@@ -3,7 +3,7 @@
  @author Cole Bardin <cab572@drexel.edu>
  @date September 23, 2024
  @section DESCRIPTION
- This file contains the function prototype used for the Monty Hall simulator threads.
+ This file contains the function prototype used for the Monty Hall simulator thread function.
  */
 
 /**

@@ -17,6 +17,8 @@
  */
 #include <iostream>
 #include <random>
+#include <chrono>
+#include <functional>
 #include <thread>
 #include <time.h>
 
@@ -35,10 +37,7 @@ int main(int argc, char **argv) {
         std::cerr << "Usage: " << argv[0] << " <ntests>" << std::endl;     
         return 1;
     }
-
     std::cout << "Monty Hall Problem Simulator" << std::endl;
-    // Seed random number generator
-    srand(time(NULL));
 
     // Spin & join threads, each with half of the workload
     int ret0 = 0;
@@ -61,14 +60,24 @@ int runTests(int tests, int *ret){
     int switchWins;
     int prize;
     int choice;
-    
+
     if(!ret) return -1;
+    
+    // Seed RNG from algorithm from lecture
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    auto clock = currentTime.time_since_epoch();
+    int ticks = clock.count();
+    std::default_random_engine gen(ticks);
+    std::uniform_int_distribution<int> dis(0,2);
+    auto getRandom = std::bind(dis, gen);
 
     switchWins = 0;
     // Simulate Monty Hall problem and accumulate number of switch wins
     while(tests-- > 0){
-        prize = std::rand() / ((RAND_MAX + 1u)/ 3);   
-        choice = std::rand() / ((RAND_MAX + 1u)/ 3);   
+        //prize = std::rand() / ((RAND_MAX + 1u)/ 3);   
+        prize = getRandom();
+        choice = getRandom();
+        //choice = std::rand() / ((RAND_MAX + 1u)/ 3);   
         if(prize != choice) switchWins++;
     }
 
