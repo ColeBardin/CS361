@@ -24,6 +24,13 @@
 
 #include "monty.h"
 
+/**
+ @funciton main
+ @brief Error handles command line arguments, spins threads, and outputs simulation statistics.
+ @param argc is the number of command line arguments.
+ @param argv contains the arguments themselves. argv[1] should be the number of tests to run.
+ @return 0 on success, 1 otherwise.
+ */
 int main(int argc, char **argv) {
     // Validate number of and values provided as command line arguments
     if(argc != 2){
