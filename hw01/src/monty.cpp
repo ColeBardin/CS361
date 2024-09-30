@@ -21,6 +21,7 @@
 #include <functional>
 #include <thread>
 #include <time.h>
+#include <iomanip>
 
 #include "monty.h"
 
@@ -57,8 +58,9 @@ int main(int argc, char **argv) {
     // Perform analysis and print out stats
     int switchWins = ret0 + ret1;
     float switchWinRatio = 100.0 * switchWins / tests;
-    std::cout << "Switch would win " << switchWinRatio << " percent of experiments." << std::endl;
-    std::cout << "Stay would win   " << 100.0 - switchWinRatio << " percent of experiments." << std::endl;
+    float stayWinRatio = 100.0 - switchWinRatio;
+    std::cout << "Switch would win " << std::fixed << std::setprecision(2) << switchWinRatio << " percent of experiments." << std::endl;
+    std::cout << "Stay would win   " << std::fixed << std::setprecision(2) << stayWinRatio << " percent of experiments." << std::endl;
 
     return 0;
 }
