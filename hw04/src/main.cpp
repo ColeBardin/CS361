@@ -52,7 +52,7 @@ int main(int argc, char **argv){
     }
     int threadCount = atoi(argv[1]);
     if(threadCount < 1){
-        std::cerr << "ERROR: threadCount must be greater than 1" << std::endl;
+        std::cerr << "ERROR: threadCount must be greater than 0" << std::endl;
         return 1;
     }
 
