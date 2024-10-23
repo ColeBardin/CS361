@@ -2,3 +2,6 @@
 */bin
 */obj
 *.zip
+*/html
+*/latex
+*/.DS_Store
