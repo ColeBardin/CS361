@@ -31,6 +31,7 @@ std::queue<int> diceRolls;
 std::queue<std::thread::id> podium;
 std::mutex diceLock;
 std::mutex podiumLock;
+std::mutex ioLock;
 
 /**
  Run all tests then run timings.
@@ -86,6 +87,7 @@ void gameMaster(int threadCount){
     int diceRoll;
     int i;
 
+    std::cout << "Starting Race with " << threadCount << " threads." << std::endl;
     while(podium.size() < threadCount){
         diceCount = getDiceCount();
         diceLock.lock();
@@ -118,18 +120,27 @@ void gamePlayer(){
 
     while(position < 20){
         if(diceRolls.size() != 0){
-            if(position == 0) std::cout << "Thread " << tid << " has left the gate." << std::endl;
+            if(position == 0){
+                ioLock.lock();
+                std::cout << "Thread " << tid << " has left the gate." << std::endl;
+                ioLock.unlock();
+            }
+
             diceLock.lock();             
             roll = diceRolls.front();
             diceRolls.pop();
             position += roll;
+            ioLock.lock();
             std::cout << "Thread " << tid << " moved forward " << roll << " spaces." << std::endl;
+            ioLock.unlock();
             diceLock.unlock();
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(getSleep()));
     }
 
+    ioLock.lock();
     std::cout << "Thread " << tid << " has crossed the finish line." << std::endl;
+    ioLock.unlock();
 
     podiumLock.lock();
     podium.push(tid);
