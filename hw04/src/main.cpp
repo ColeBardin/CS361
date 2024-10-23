@@ -56,6 +56,7 @@ int main(int argc, char **argv){
         return 1;
     }
 
+    std::cout << "Starting Race with " << threadCount << " threads." << std::endl;
     for(int i = 0; i < threadCount; i++){
         players.push_back(std::thread(gamePlayer));
     }
@@ -65,10 +66,18 @@ int main(int argc, char **argv){
     for(auto &p : players) p.join();
     controller.join();
 
+    int i = 1;
+    while(podium.size() != 0){
+        std::cout << i++ << ": " << podium.front() << std::endl;
+        podium.pop();
+    }
     return 0;
 }
 
 void gameMaster(int threadCount){
+    int diceCount;
+    int diceRoll;
+
     auto currentTime = std::chrono::high_resolution_clock::now();
     auto clock = currentTime.time_since_epoch();
     int ticks = clock.count();
@@ -83,30 +92,21 @@ void gameMaster(int threadCount){
     std::uniform_int_distribution<int> dis0_2000(0,2000);
     auto getSleep = std::bind(dis0_2000, gen);
 
-    int diceCount;
-    int diceRoll;
-    int i;
-
-    std::cout << "Starting Race with " << threadCount << " threads." << std::endl;
     while(podium.size() < threadCount){
         diceCount = getDiceCount();
         diceLock.lock();
-        for(i = 0; i < diceCount; i++){
+        for(int i = 0; i < diceCount; i++){
             diceRoll = rollD6();
             diceRolls.push(diceRoll);
         }
         diceLock.unlock();
         std::this_thread::sleep_for(std::chrono::milliseconds(getSleep()));
     }
-    i = 1;
-    while(podium.size() != 0){
-        std::cout << i++ << ": " << podium.front() << std::endl;
-        podium.pop();
-    }
 }
 
 void gamePlayer(){
     int position = 0;
+    int roll;
     std::thread::id tid = std::this_thread::get_id();
 
     auto currentTime = std::chrono::high_resolution_clock::now();
@@ -115,8 +115,6 @@ void gamePlayer(){
     std::default_random_engine gen(ticks);
     std::uniform_int_distribution<int> dis0_2000(0,2000);
     auto getSleep = std::bind(dis0_2000, gen);
-
-    int roll;
 
     while(position < 20){
         if(diceRolls.size() != 0){
