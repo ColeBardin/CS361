@@ -3,9 +3,13 @@ GCC=g++
 OBJ=obj
 BIN=bin
 
-bin/race: src/main.cpp 
+bin/race: src/main.cpp obj/semaphore.o
 	[ -d $(BIN) ] || mkdir -p $(BIN)
-	${GCC} ${STD} -o bin/race src/main.cpp
+	${GCC} ${STD} -o bin/race src/main.cpp obj/semaphore.o
+
+obj/semaphore.o: src/semaphore.h src/semaphore.cpp
+	[ -d $(OBJ) ] || mkdir -p $(OBJ)
+	${GCC} ${STD} -c -o obj/semaphore.o src/semaphore.cpp
 
 run: bin/race
 	bin/race 2 || true
