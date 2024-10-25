@@ -120,10 +120,10 @@ void gameMaster(int threadCount){
             for(int i = 0; i < diceCount; i++){
                 diceRoll = rollD6();
                 diceRolls.push(diceRoll);
+                // Increase semaphore value by number of new values added to queue
+                sem.signal();
             }
         }
-        // Alert players that there are rolls available
-        sem.signal();
         std::this_thread::sleep_for(std::chrono::milliseconds(getSleep()));
     }
 }
@@ -155,9 +155,9 @@ void gamePlayer(){
                 roll = diceRolls.front();
                 diceRolls.pop();
                 position += roll;
-                {std::lock_guard<std::mutex> guard(ioLock);
-                    std::cout << "Thread " << tid << " moved forward " << roll << " spaces." << std::endl;
-                }
+            }
+            {std::lock_guard<std::mutex> guard(ioLock);
+                std::cout << "Thread " << tid << " moved forward " << roll << " spaces." << std::endl;
             }
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(getSleep()));
@@ -168,8 +168,8 @@ void gamePlayer(){
         std::cout << "Thread " << tid << " has crossed the finish line." << std::endl;
     }
 
-    podiumLock.lock();
-    podium.push(tid);
-    podiumLock.unlock();
+    {std::lock_guard<std::mutex> guard(podiumLock);
+        podium.push(tid);
+    }
 }
 
