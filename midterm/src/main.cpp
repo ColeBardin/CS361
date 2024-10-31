@@ -16,12 +16,10 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-#include <cstdlib>
 #include <random>
 #include <chrono>
 #include <time.h>
 #include <functional>
-#include <queue>
 #include <mutex>
 #include "semaphore.h"
 
@@ -32,8 +30,9 @@
  */
 void pledgeFunc(int kegs, int kegSize);
 
-/*
+/**
  Attempts to drink from the keg then sleeps for random amount of time. If they took the last drink, signal the pledge to refill it. Leave once the party is over.
+ @param number is the thread index which is more human readable than TIDs
  */
 void drinkerFunc(int number);
 
