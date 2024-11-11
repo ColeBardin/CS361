@@ -15,7 +15,6 @@
 #include <iostream>
 #include <thread>
 #include <vector>
-#include <mutex>
 #include <random>
 #include <chrono>
 #include <time.h>
@@ -29,8 +28,8 @@
  */
 void eaterTask(int id);
 
-std::mutex ioLock;
 Semaphore seats = Semaphore(5);
+Semaphore ioLock = Semaphore(1);
 
 /**
  Handles command line arguments and spins eater threads. Returns once all eater threads return.
@@ -71,26 +70,31 @@ void eaterTask(int id){
     auto getSleep = std::bind(dis0_3000, gen);
 
     // Wake up
-    {std::lock_guard<std::mutex> guard(ioLock);
-        std::cout << "Person " << id << " woke up from their nap." << std::endl;
-    }
+    ioLock.wait();
+    std::cout << "Person " << id << " woke up from their nap." << std::endl;
+    ioLock.signal();
+
     // Walk to bar
     std::this_thread::sleep_for(std::chrono::milliseconds(getSleep()));
-    {std::lock_guard<std::mutex> guard(ioLock);
-        std::cout << "Person " << id << " got to the noodle bar." << std::endl;
-    }
+    ioLock.wait();
+    std::cout << "Person " << id << " got to the noodle bar." << std::endl;
+    ioLock.signal();
+
     // Wait for a seat
     seats.wait();
+
     // Start eating
-    {std::lock_guard<std::mutex> guard(ioLock);
-        std::cout << "Person " << id << " started eating." << std::endl;
-    }
+    ioLock.wait();
+    std::cout << "Person " << id << " started eating." << std::endl;
+    ioLock.signal();
     std::this_thread::sleep_for(std::chrono::milliseconds(getSleep()));
+
     // Go home
-    {std::lock_guard<std::mutex> guard(ioLock);
-        std::cout << "Person " << id << " finished eating and is heading home." << std::endl;
-    }
+    ioLock.wait();
+    std::cout << "Person " << id << " finished eating and is heading home." << std::endl;
+    ioLock.signal();
     seats.signal();
 
     return;
 }
+

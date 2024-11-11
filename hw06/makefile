@@ -27,10 +27,10 @@ test3: ${EXE}
 .PHONY: doc
 doc:
 	doxygen config
-	#cd latex && make
+	cd latex && make
 
 clean:
-	rm -f bin/run
+	rm -f ${BIN}/${EXE}
 	rm -r -f bin
 	rm -r -f obj
 	rm -r -f html

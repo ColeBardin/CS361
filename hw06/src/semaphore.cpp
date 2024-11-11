@@ -1,48 +1,46 @@
 /**
-    @file
-    @author Mark Boady <mwb33@drexel.edu>
-    @date 2024
-    @section Description
-
-    This file gives the implementation details of the semaphore class.
+ @file
+ @author Mark Boady <mwb33@drexel.edu>
+ @date November 2024
+ @section Description
+ 
+ Implementation of a Semaphore with atomics.
  */
+#include "semaphore.h"
+#include <thread>
 
- #include "semaphore.h"
- #include <sstream>
- #include <string>
+//Store a 1 into the atomic
+Semaphore::Semaphore(){
+    counter.store(1);
+}
 
- Semaphore::Semaphore(){
-    counter = 1;
- }
+//Store whatever value is given.
+Semaphore::Semaphore(int k){
+    counter.store(k);
+}
 
- Semaphore::Semaphore(unsigned int start){
-    counter = start;
- }
-
- void Semaphore::signal(){
-    {std::lock_guard<std::mutex> guard(counterLock);
-        counter++;
-    }//End of scope for the lock guard
-    cv.notify_all();//Tell all threads to check if it is their turn.
- }
-
- void Semaphore::wait(){
-    //Lock to protect the counter
-    std::unique_lock<std::mutex> guard(counterLock);
-    //Wait until the counter is large enough was can decrement
-    cv.wait(guard, [this]{return counter > 0;});
-    counter--;
- }
-
-std::ostream& operator<<(std::ostream& os, const Semaphore& s){
-    //Use streams to make a string
-    std::ostringstream toOutput;
-    //Lock read to the counter
-    {std::lock_guard<std::mutex> guard(s.counterLock);
-         toOutput << "[Semaphore Counter: " << s.counter << "]";
+//Wait until we can decrement.
+void Semaphore::wait(){
+    int old = counter.load();
+    while(true){
+        while(old==0){
+            //Give Someone else a chance
+            std::this_thread::yield();
+            old = counter.load();
+        }//old != 0 here
+        int current = old - 1;
+        bool a = counter.compare_exchange_strong(old,current);
+        if(a){return;}
     }
-    std::string str = toOutput.str();
-    //print the string all at once (to avoid interleaving)
-    os << str;
-    return os;
- }
+}
+
+//Increment counter by one
+void Semaphore::signal(){
+    int old = counter.load();
+    while(true){
+        int current = old + 1;
+        bool a = counter.compare_exchange_strong(old,current);
+        if(a){return;}
+    }
+}
+
