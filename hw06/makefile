@@ -17,6 +17,13 @@ ${OBJ}/semaphore.o: ${SRC}/semaphore.h ${SRC}/semaphore.cpp
 test1: ${EXE}
 	${BIN}/${EXE} 10 || true
 
+test2: ${EXE}
+	${BIN}/${EXE} 20 || true
+
+test3: ${EXE}
+	${BIN}/${EXE} 100 || true
+
+
 .PHONY: doc
 doc:
 	doxygen config
