@@ -36,7 +36,7 @@ I used 2 semaphores. I used one to emulate the bar seats, it is initialized to t
 
 ### Question 2
 
-All threads call `wait()` on the semaphore. If there are no empty seats, then they wait until one does open.
+All threads call `wait()` on the semaphore. If there are no empty seats, then they wait until one does open. When they execute passed the `wait()` call, a seat was released and they acquired it.
 
 ### Question 3
 
