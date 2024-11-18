@@ -35,10 +35,10 @@ std::mutex driverLock; // Protects the driver's seat
 std::mutex passengerLock; // Protects the passenger seat
 Semaphore boatAtMainland(0); // Used for lazy people to tell chosen one boat is at mainland
 Semaphore passengerReady(0); // Used for chosen one to tell lazy people they're ready
-Semaphore permissionToLeave(0);
+Semaphore permissionToLeave(0); // Used for chosen one to permit lazy people to leave
 
-std::vector<std::thread> adults;
-std::vector<std::thread> children;
+std::vector<std::thread> adults; // Vector of adult threads
+std::vector<std::thread> children; // Vector of child threads
 
 // Program statistics
 int peopleLeft;
@@ -107,11 +107,11 @@ int main(int argc, char **argv){
     adultDrivers = 0 ;
     childDrivers = 0;
 
-    // Start adults, they're lazy
+    // Start all adult threads, they're lazy
     for(i = 0; i < nAdults; i++) adults.push_back(std::thread(beLazy, i, true));
-    // Start the chosen child to do all the work
+    // Start the chosen child thread, they do all the work
     children.push_back(std::thread(doEverything, 0));
-    // Start remaining children, they're lazy
+    // Start remaining child threads, they're lazy
     for(i = 1; i < nChildren; i++) children.push_back(std::thread(beLazy, i, false));
     // Join all threads
     for(auto &a : adults) a.join();
@@ -142,6 +142,7 @@ void beLazy(int i, bool adult){
         passengerReady.wait();
         // Drive boat to mainland 
         rowBoat();
+        // Update stats
         if(adult){
             boatsWith1Child1Adult++;
             adultDrivers++;
@@ -177,6 +178,7 @@ void doEverything(int i){
                 }
                 // Drive back to island
                 rowBoat();
+                // Update stats
                 boatsWith1Person++;
                 childDrivers++;
             }else return; // Otherwise, it's over
@@ -194,6 +196,7 @@ void rowBoat(){
     static auto getSleep = std::bind(dis1000_4000, gen);
     static bool boatAtIsland = true;
 
+    // Announce direction and update stats
     {std::lock_guard<std::mutex> guard(ioLock);
         if(boatAtIsland){
             std::cout << "Boat is traveling from island to mainland." << std::endl;
@@ -205,6 +208,7 @@ void rowBoat(){
     }
     // Delay to emulate travel time
     std::this_thread::sleep_for(std::chrono::milliseconds(getSleep()));
+    // Update state
     boatAtIsland = !boatAtIsland;
 }
 
