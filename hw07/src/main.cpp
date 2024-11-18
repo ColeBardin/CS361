@@ -194,6 +194,8 @@ void rowBoat(){
     static std::default_random_engine gen(ticks);
     static std::uniform_int_distribution<int> dis1000_4000(1000,4000);
     static auto getSleep = std::bind(dis1000_4000, gen);
+    
+    // Initialize static state
     static bool boatAtIsland = true;
 
     // Announce direction and update stats
