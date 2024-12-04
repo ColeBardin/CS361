@@ -6,13 +6,17 @@ OBJ=obj
 BIN=bin
 EXE=search
 
-${EXE}: ${SRC}/main.cpp ${OBJ}/semaphore.o
+${EXE}: ${SRC}/main.cpp ${OBJ}/threadPool.o ${OBJ}/searchTask.o
 	[ -d $(BIN) ] || mkdir -p $(BIN)
-	${CC} ${STD} -o ${BIN}/${EXE} ${SRC}/main.cpp ${OBJ}/semaphore.o
+	${CC} ${STD} -o ${BIN}/${EXE} ${SRC}/main.cpp ${OBJ}/threadPool.o ${OBJ}/searchTask.o
 
-${OBJ}/semaphore.o: ${SRC}/semaphore.h ${SRC}/semaphore.cpp 
-	[ -d $(OBJ) ] || mkdir -p $(OBJ)
-	${CC} ${CFLAGS} -c -o ${OBJ}/semaphore.o ${SRC}/semaphore.cpp
+${OBJ}/searchTask.o: ${SRC}/task.h ${SRC}/searchTask.h ${SRC}/searchTask.cpp ${SRC}/channel.h
+	mkdir -p obj
+	${CC} ${CFLAGS} -c -o ${OBJ}/searchTask.o ${SRC}/searchTask.cpp
+
+${OBJ}/threadPool.o: ${SRC}/task.h ${SRC}/threadPool.h ${SRC}/threadPool.cpp
+	mkdir -p obj
+	${CC} ${CFLAGS} -c -o ${OBJ}/threadPool.o ${SRC}/threadPool.cpp
 
 .PHONY: doc
 doc:
