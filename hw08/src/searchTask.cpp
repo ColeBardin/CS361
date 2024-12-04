@@ -1,7 +1,7 @@
 /**
  @file
- @author Mark Boady <mwb33@drexel.edu>
- @date Orgininal: 2021, Revised: 2024
+ @author Cole Baridn <cab572@drexel.edu>
+ @date December 4th, 2024
  @section Description
  
  Implementation of search tasks.
@@ -21,7 +21,7 @@ searchTask::~searchTask(){
     // Nothing to do
 }
 
-std::queue<task*>*  searchTask::runTask(){
+std::queue<task*>* searchTask::runTask(){
     std::thread::id tid = std::this_thread::get_id();
     std::ifstream infile(myPath);
     std::string lineString;
@@ -49,3 +49,4 @@ void searchTask::announceFind(std::thread::id tid, std::string file, int lineNum
     std::cout << "−−−−−−−−−−" << std::endl;
     ioLk->send(0);
 }
+

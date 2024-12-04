@@ -58,7 +58,6 @@ int main(int argc, char **argv){
     if(!std::filesystem::is_directory(start_dir)){
         std::cerr << "ERROR: Given directory '" << dir << "' is not a directory." << std::endl;
         return 1;
-
     }
     // Create and run producer thread
     std::thread producer(producerTask, target, dir);
