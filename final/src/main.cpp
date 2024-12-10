@@ -2,6 +2,10 @@
  @mainpage CS361 Final - Jurassic Park Safari Ride 
  @section Description
 
+ This program simulates a Jurassic Park Safari ride and demonstrates inter-thread communicaiton. 
+ There are people threads, car threads, and a dinosaur thread. 
+ People wander around the park and get in line for the ride. When a car is available they ride and then go home.
+ The dinosaur tries to escape. If it does, it eats all people not in cars.
 */
 
 /**
@@ -10,6 +14,7 @@
  @date December 7th, 2024
  @section Description
  
+ Main file of the program. It contains global variables for the threads. It also has the thread functions for people, cars, and the dinosaur.
  */
 
 #include <iostream>
@@ -22,18 +27,29 @@
 #include <time.h>
 #include <functional>
 #include <cstdlib>
-#include "semaphore.h"
 #include "channel.h"
 
-bool end;
-bool dinosaurEscaped;
+bool end; /* Signal to car threads and dinosaur thread that all people threads are done */
+bool dinosaurEscaped; /* Variable to say the state of the dinosaur's escape plan */
 std::mutex ioLock; /* Protects the IO stream*/
-std::mutex lineLock;
-std::queue<channel<int> *> line;
-std::vector<std::thread> people;
+std::mutex lineLock; /* Protects the line queue */
+std::queue<channel<int> *> line; /* Line for the safari ride */
 
+/*
+ @brief thread body for people. They wander around the park, then get in line, then ride, then go home.
+ @param id is the person's number
+ */
 void peopleThread(int id);
+
+/*
+ @brief car thread body. Waits for people to get in line. Then rides them around. Will return when all people are gone
+ @param id is the car's number
+ */
 void carThread(int id);
+
+/**
+ @brief dinosaur thread body. Has a 1 in 10 chance of escaping every 1-4 seconds.
+ */
 void dinosaurThread();
 
 /**
@@ -44,6 +60,7 @@ void dinosaurThread();
  */
 int main(int argc, char **argv){
     int i;
+    // handle command line arguments
     if(argc != 3){
         std::cerr << "ERROR: Incorrect number of arguments" << std::endl;
         std::cout << "USAGE: " << argv[0] << " <numPeople> <numCars>" << std::endl;
@@ -69,18 +86,26 @@ int main(int argc, char **argv){
     std::cout << "Number of park attendees: " << numPeople << std::endl;
     std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
     
+    // Set defaut state variables
     end = false;
     dinosaurEscaped = false;
 
+    // Spin threads
+    std::vector<std::thread> people;
     for(i = 0; i < numPeople; i++) people.push_back(std::thread(peopleThread, i));
     std::vector<std::thread> cars;
     for(i = 0; i < numCars; i++) cars.push_back(std::thread(carThread, i));
     std::thread dinosaur(dinosaurThread);
 
+    // Wait for people to be done
     for(auto &p : people) p.join();
+    // Signal end of program
     end = true;
+    // Wait for car threads and dinosaur thread to exit
     for(auto &c : cars) c.join();
     dinosaur.join();
+    std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
+    std::cout << "Program End" << std::endl;
 
     return 0;
 }
@@ -121,11 +146,19 @@ void peopleThread(int id){
     ticket->send(id);
     // Wait for ride to be over then get out
     ticket->receive();
+    // Dinosaur can't catch cars, so steal it
+    if(dinosaurEscaped){
+        {std::lock_guard<std::mutex> guard(ioLock);
+            std::cout << "Person " << id << " stole the car to escape from the dinosaur!" << std::endl;
+        }
+        return;
+    }
     {std::lock_guard<std::mutex> guard(ioLock);
         std::cout << "Person " << id << " got out of car " << car << std::endl;
     }
+    // Walk to the exit
     std::this_thread::sleep_for(std::chrono::milliseconds(getSleep()));
-    // Dinosaur can't catch cars, but waits for people to leave
+    // Dinosaur can catch them on the way out
     if(dinosaurEscaped) goto die;
     // Go home safely
     {std::lock_guard<std::mutex> guard(ioLock);
@@ -133,10 +166,12 @@ void peopleThread(int id){
     }
     return;
 die:
+    // Print out death message
     {std::lock_guard<std::mutex> guard(ioLock);
         std::cout << "Person " << id << " was eaten by the dinosaur!" << std::endl;
     }
     return;
+
 }
 
 void carThread(int id){
@@ -200,7 +235,7 @@ void dinosaurThread(){
     for(;;){
         std::this_thread::sleep_for(std::chrono::milliseconds(getSleep()));
         // Try to escape
-        if(end) break;
+        if(end) return;
         if(getOut() == 0){
             {std::lock_guard<std::mutex> guard(ioLock);
                 std::cout << "~~~~~~~~~~~~~~~~~~~~~~~~" << std::endl;
@@ -211,5 +246,4 @@ void dinosaurThread(){
             return;
         }
     }
-    return; 
 }
